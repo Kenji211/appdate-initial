@@ -102,9 +102,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
         children: [
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: fetchAcceptedPosts(department),
-              builder: (context,
-                  AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+              future: fetchAllAcceptedPosts(),
+              builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -134,28 +133,23 @@ class _StudentHomePageState extends State<StudentHomePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      postData['clubName'] ?? 'Unknown Club',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      postData['timestamp'] != null
-                                          ? DateFormat('hh:mm a MMM dd yyyy')
-                                              .format((postData['timestamp']
-                                                      as Timestamp)
-                                                  .toDate())
-                                          : 'N/A', // Use N/A if timestamp is null
-                                      style:
-                                          const TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
+                                Text(
+                                  postData['clubName'] ?? 'Unknown Club',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  postData['timestamp'] != null
+                                      ? DateFormat('hh:mm a MMM dd yyyy')
+                                          .format((postData['timestamp']
+                                                  as Timestamp)
+                                              .toDate())
+                                      : 'N/A', // Use N/A if timestamp is null
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -188,59 +182,28 @@ class _StudentHomePageState extends State<StudentHomePage> {
     );
   }
 
-  // Function to fetch accepted posts from the student's department and Non-Academic department
-  Future<List<Map<String, dynamic>>> fetchAcceptedPosts(
-      String department) async {
+  // Function to fetch all accepted posts from specified departments
+  Future<List<Map<String, dynamic>>> fetchAllAcceptedPosts() async {
     List<Map<String, dynamic>> acceptedPosts = [];
 
-    // Fetch accepted posts from the student's department
-    var departmentPostsSnapshot = await FirebaseFirestore.instance
-        .collection('creator')
-        .where('department', isEqualTo: department)
-        .get();
+    // List of departments to fetch posts from
+    List<String> departments = ['CAS', 'CED', 'CEAC', 'CBA', 'Non Academic'];
 
-    for (var creator in departmentPostsSnapshot.docs) {
+    for (String dept in departments) {
+      // Fetching posts directly from the department's collection
       var postsSnapshot = await FirebaseFirestore.instance
-          .collection('creator')
-          .doc(creator.id)
-          .collection('posts')
+          .collection(dept) // Assuming each department has its own collection
           .where('status', isEqualTo: 'Accepted')
           .get();
 
       for (var post in postsSnapshot.docs) {
         var postData = post.data();
-        postData['clubName'] =
-            creator.id; // Assuming the creator ID is the club name
-        postData['department'] = department; // Add department info to postData
+        postData['clubName'] = postData['clubName'] ?? 'Unknown Club';
+        postData['department'] = dept;
         acceptedPosts.add(postData);
       }
     }
 
-    // Fetch accepted posts from the Non-Academic department
-    var nonAcadPostsSnapshot = await FirebaseFirestore.instance
-        .collection('creator')
-        .where('department', isEqualTo: 'Non Academic')
-        .get();
-
-    for (var creator in nonAcadPostsSnapshot.docs) {
-      var postsSnapshot = await FirebaseFirestore.instance
-          .collection('creator')
-          .doc(creator.id)
-          .collection('posts')
-          .where('status', isEqualTo: 'Accepted')
-          .get();
-
-      for (var post in postsSnapshot.docs) {
-        var postData = post.data();
-        postData['clubName'] =
-            creator.id; // Assuming the creator ID is the club name
-        postData['department'] =
-            'Non Academic'; // Add department info to postData
-        acceptedPosts.add(postData);
-      }
-    }
-
-    // Sort posts by timestamp in descending order (latest first)
     acceptedPosts.sort((a, b) {
       Timestamp timestampA = a['timestamp'] ?? Timestamp(0, 0);
       Timestamp timestampB = b['timestamp'] ?? Timestamp(0, 0);

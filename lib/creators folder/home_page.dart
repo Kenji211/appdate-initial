@@ -193,6 +193,7 @@ class _CreatorHomePageState extends State<CreatorHomePage> {
               return AddPostDialog(
                 clubEmail: email,
                 clubName: clubName,
+                department: department,
               ); // Pass the club email
             },
           );
@@ -256,42 +257,28 @@ class _CreatorHomePageState extends State<CreatorHomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // Custom widget to fetch and display the profile image URL
-                              ProfileAvatar(
-                                creatorId: postData['creatorId'],
+                              Text(
+                                postData['clubName'] ??
+                                    'Unknown Club', // Club name
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              const SizedBox(width: 8),
-                              // Club name and timestamp
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    postData['clubName'] ?? 'N/A', // Club name
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors
-                                          .blue, // Optional: color for club name
-                                    ),
-                                  ),
-                                  Text(
-                                    postData['timestamp'] != null
-                                        ? DateFormat(
-                                                'hh:mm a  EEE. MMM dd yyyy')
-                                            .format(
-                                            (postData['timestamp'] as Timestamp)
-                                                .toDate(),
-                                          )
-                                        : 'N/A',
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                ],
+                              Text(
+                                postData['timestamp'] != null
+                                    ? DateFormat('hh:mm a MMM dd yyyy').format(
+                                        (postData['timestamp'] as Timestamp)
+                                            .toDate())
+                                    : 'N/A', // Use N/A if timestamp is null
+                                style: const TextStyle(color: Colors.grey),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          // Display title
+                          // Displaying Post Title
                           Text(
                             postData['title'] ?? 'N/A', // Post title
                             style: const TextStyle(
@@ -300,7 +287,7 @@ class _CreatorHomePageState extends State<CreatorHomePage> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          // Display content
+                          // Displaying Post Content
                           Text(
                             postData['content'] ?? 'N/A', // Post content
                             style: const TextStyle(fontSize: 16),

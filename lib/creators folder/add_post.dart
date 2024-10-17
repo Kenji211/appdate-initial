@@ -4,11 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
 class AddPostDialog extends StatefulWidget {
   final String clubEmail; // Club email to identify the creator
   final String clubName; // Club name to be passed to Firebase
+  final String department; // Department to which the post belongs
 
   const AddPostDialog({
     super.key,
     required this.clubEmail,
     required this.clubName,
+    required this.department, // Added department parameter
   });
 
   @override
@@ -42,16 +44,15 @@ class _AddPostDialogState extends State<AddPostDialog> {
 
       try {
         CollectionReference postsCollection = FirebaseFirestore.instance
-            .collection('creator')
-            .doc(widget.clubEmail) // Document based on the creator's email
-            .collection('posts');
+            .collection(
+                widget.department); // Collection to hold individual posts
 
-        // Save the post to Firestore under the creator's document
+        // Save the post to Firestore under the department's collection
         await postsCollection.doc(postId).set({
           'title': title,
           'content': content,
           'timestamp': timestamp,
-          'status': 'Pending', // Initially set status to 'Pending'
+          'status': 'Accepted', // Initially set status to 'Accepted'
           'clubName': widget.clubName, // Pass clubName to Firestore
         });
 

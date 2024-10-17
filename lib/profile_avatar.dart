@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ProfileAvatar extends StatefulWidget {
-  final String creatorId;
+  final String creatorEmail;
 
-  const ProfileAvatar({Key? key, required this.creatorId}) : super(key: key);
+  const ProfileAvatar({Key? key, required this.creatorEmail}) : super(key: key);
 
   @override
   _ProfileAvatarState createState() => _ProfileAvatarState();
@@ -24,7 +24,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
       // Fetch the document from the 'creator' collection using the creator ID
       final creatorDoc = await FirebaseFirestore.instance
           .collection('creator')
-          .doc(widget.creatorId)
+          .doc(widget.creatorEmail)
           .get();
 
       if (creatorDoc.exists) {
